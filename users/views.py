@@ -105,7 +105,11 @@ class RequestPasswordResetView(APIView):
         email = serializer.validated_data["email"]
         user = User.objects.get(email=email)
         # Отправка письма
-        send_email_reset_password.delay(email, user)
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.id))
+
+
+        send_email_reset_password.delay(email, token, uid)
       
   
         return Response(
@@ -159,7 +163,7 @@ class ChangeEmailRequestView(APIView):
         
         new_email = serializer.validated_data["new_email"]
         
-        send_email_confirm_new_email.delay(new_email, user)
+        send_email_confirm_new_email.delay(new_email, user.id)
 
         return Response(
             {"message": "Ссылка для подтверждения отправлена на новый email"},

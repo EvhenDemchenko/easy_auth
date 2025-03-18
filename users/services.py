@@ -1,26 +1,24 @@
 from celery import shared_task
 from django.core.mail import send_mail
-from django.conf import settings
+from core import settings
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 
 
 @shared_task
-def send_email_confirmation(user):
+def send_email_confirmation(user_id, user_email):
     """Отправка письма для подтверждения email"""
     subject = "Подтверждение email"
     message = (
-        f"Перейдите по ссылке: http://localhost:8000/users/confirm-email/{user.pk}/"
+        f"Перейдите по ссылке: http://localhost:8000/users/confirm-email/{user_id}/"
     )
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+    send_mail(subject, message, settings.EMAIL_HOST_USER, [user_email])
 
 
 @shared_task
-def send_email_reset_password(email, user):
+def send_email_reset_password(email, token, uid):
 
-    uid = urlsafe_base64_encode(force_bytes(user.id))
-    token = default_token_generator.make_token(user)
 
     reset_link = (
         f"http://localhost:8000/users/password-reset-confirm/{uid}/{token}/"
@@ -37,8 +35,8 @@ def send_email_reset_password(email, user):
 
 
 @shared_task
-def send_email_confirm_new_email( new_email,user):
-    confirm_link = f"http://localhost:8000/users/confirm-new-email/{user.id}/?new_email={new_email}"
+def send_email_confirm_new_email(new_email, user_id):
+    confirm_link = f"http://localhost:8000/users/confirm-new-email/{user_id}/?new_email={new_email}"
 
     send_mail(
         "Подтверждение нового email",

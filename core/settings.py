@@ -187,6 +187,8 @@ EMAIL_HOST_USER = "tentacles35@gmail.com"
 EMAIL_HOST_PASSWORD = "sqxidlvbzqcpsknh"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False  # Должно быть False, если EMAIL_USE_TLS=True
+
 
 
 # Celery
