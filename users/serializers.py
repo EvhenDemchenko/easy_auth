@@ -20,7 +20,7 @@ class RegisterSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
-        send_email_confirmation(user)  # Отправляем письмо
+        send_email_confirmation.delay(user)  # Отправляем письмо
         return user
 
 
