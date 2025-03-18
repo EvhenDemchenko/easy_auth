@@ -130,6 +130,17 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "users.User"
 
+# Caches
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -172,7 +183,12 @@ SIMPLE_JWT = {
 # Настройки почты (для отправки писем)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
-# EMAIL_HOST_USER =
-# EMAIL_HOST_PASSWORD =
+EMAIL_HOST_USER = "tentacles35@gmail.com"
+EMAIL_HOST_PASSWORD = "sqxidlvbzqcpsknh"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+
+# Celery
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True

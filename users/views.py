@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+
+from users.services import send_email_confirm_new_email, send_email_reset_password
 from .serializers import (
     RegisterSerializer,
     ProfileSerializer,
@@ -14,7 +16,6 @@ from .serializers import (
     ChangeEmailRequestSerializer,
 )
 
-from .services import send_email_confirmation
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
@@ -66,7 +67,7 @@ class LoginView(APIView):
 class ProfileView(APIView):
     """Просмотр и обновление профиля"""
 
-    permission_classes: list[type[IsAuthenticated]] = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request) -> Response:
         serializer = ProfileSerializer(request.user)
@@ -103,23 +104,10 @@ class RequestPasswordResetView(APIView):
 
         email = serializer.validated_data["email"]
         user = User.objects.get(email=email)
-
-        # Генерация токена и ссылки
-        uid = urlsafe_base64_encode(force_bytes(user.id))
-        token = default_token_generator.make_token(user)
-        reset_link = (
-            f"http://localhost:8000/users/password-reset-confirm/{uid}/{token}/"
-        )
-
         # Отправка письма
-        send_mail(
-            "Сброс пароля",
-            f"Привет, перейдите по ссылке, чтобы сбросить пароль: {reset_link}",
-            "noreply@example.com",
-            [email],
-            fail_silently=False,
-        )
-
+        send_email_reset_password.delay(email, user)
+      
+  
         return Response(
             {"message": "Ссылка на сброс пароля отправлена"}, status=status.HTTP_200_OK
         )
@@ -148,7 +136,7 @@ class PasswordResetConfirmView(APIView):
             return Response(
                 {"message": "Пароль успешно изменен"}, status=status.HTTP_200_OK
             )
-
+ 
         except Exception:
             return Response(
                 {"error": "Неверный запрос"}, status=status.HTTP_400_BAD_REQUEST
@@ -165,20 +153,13 @@ class ChangeEmailRequestView(APIView):
         user = request.user
         if not user.is_authenticated:
             return Response(
-                {"error": "Пользователь не аутентифицирован"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
+                { "error": "Пользователь не аутентифицирован"},
+                  status=status.HTTP_401_UNAUTHORIZED,
+               )
+        
         new_email = serializer.validated_data["new_email"]
-        confirm_link = f"http://localhost:8000/users/confirm-new-email/{user.id}/?new_email={new_email}"
-
-        send_mail(
-            "Подтверждение нового email",
-            f"Привет, перейдите по ссылке, чтобы подтвердить новый email: {confirm_link}",
-            "noreply@example.com",
-            [new_email],
-            fail_silently=False,
-        )
+        
+        send_email_confirm_new_email.delay(new_email, user)
 
         return Response(
             {"message": "Ссылка для подтверждения отправлена на новый email"},

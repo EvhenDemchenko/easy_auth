@@ -32,3 +32,15 @@ fill all fieds with your data
 
 
 will be added soon Celery & Redis 
+
+
+To set-up Redis  and Celery 
+   # ❯ docker run --name django-redis -d -p 6379:6379 --rm redis
+   # ❯ celery -A "app_name" worker -E -l info 
+
+   + add celery.py file  and configure
+   + add tasks.py file and configure 
+   
+   #[Celery docs](https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html#using-celery-with-django)
+
+
