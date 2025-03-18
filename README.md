@@ -11,8 +11,8 @@ It includes
 
 Do this commands step by step to set-up this module to your project 
 
-python3 -m venv .env
-pip install -r req.txt 
+   - python3 -m venv .env
+   - pip install -r req.txt 
 
 makemigrations and migrate 
 
